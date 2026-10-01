@@ -1,27 +1,25 @@
 # frozen_string_literal: true
+
 require 'optparse'
-require './config/application'
+require_relative 'application'
 
-# Definindo ambiente
-ENV['APP_RUBY_ENV'] = 'desenvolvimento'
-ARGV.options do |opts|
-  opts.on("-e", "--environment=val", String)   { |val| ENV['APP_RUBY_ENV'] = val }
-  opts.parse!
-end
+module Application
+  def self.parse_options(argv, env: ENV)
+    options = { environment: env.fetch('APP_RUBY_ENV', 'desenvolvimento'), help: false }
+    parser = OptionParser.new do |opts|
+      opts.banner = 'Uso: ruby app.rb [opções]'
+      opts.on('-e AMBIENTE', '--environment AMBIENTE', ENVIRONMENTS.join(' ou ')) do |value|
+        options[:environment] = value
+      end
+      opts.on('-h', '--help', 'Exibe esta ajuda') { options[:help] = true }
+    end
 
-# Setando Variaveis do Oracle Conforme o Ambiente
-if ENV['APP_RUBY_ENV'] == 'producao'
-    ORACLE_CONFIG = Hash.new
-    ORACLE_CONFIG['host'] = APP_CONFIG[:oracle][:producao][:host]
-    ORACLE_CONFIG['user'] = APP_CONFIG[:oracle][:producao][:user]
-    ORACLE_CONFIG['password'] = APP_CONFIG[:oracle][:producao][:password]
-else
-    ORACLE_CONFIG = Hash.new
-    ORACLE_CONFIG['host'] = APP_CONFIG[:oracle][:desenvolvimento][:host]
-    ORACLE_CONFIG['user'] = APP_CONFIG[:oracle][:desenvolvimento][:user]
-    ORACLE_CONFIG['password'] = APP_CONFIG[:oracle][:desenvolvimento][:password]
+    remaining = parser.parse(argv)
+    raise OptionParser::InvalidArgument, remaining.join(' ') unless remaining.empty?
+
+    validate_environment!(options[:environment]) unless options[:help]
+    options[:usage] = parser.to_s
+    options
+  end
+
 end
-puts "---------------------------------------"
-puts "[ SISTEMA #{APP_CONFIG[:programa][:versao]} - #{APP_CONFIG[:programa][:data]} ]"
-puts "---------------------------------------"
-puts "[#{ Date.time_now }] [INFO] Rodando no ambiente de (#{ENV['APP_RUBY_ENV']})"

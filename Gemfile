@@ -8,3 +8,7 @@ gem "rest-client"
 gem "json"
 gem 'ruby-oci8'
 gem 'optparse'
+
+group :test do
+  gem 'minitest', '~> 5.22'
+end

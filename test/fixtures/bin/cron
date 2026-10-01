@@ -1,0 +1,10 @@
+#!/bin/bash
+set -euo pipefail
+printf 'cron %s\n' "$*" >> "$TEST_CALLS"
+if [[ "${TEST_RUN_SCHEDULED:-0}" == 1 ]]; then
+  CRON_COMMAND="$(sed -E 's/^([^ ]+ +){5}//; s/ # ruby-oracle-dao-app$//' "$TEST_CRONTAB" | tail -n 1)"
+  CRON_COMMAND="${CRON_COMMAND//\\%/%}"
+  env -i PATH="$TEST_BIN:/usr/bin:/bin" \
+    TEST_CALLS="$TEST_CALLS" TEST_EXPECT_ORACLE_HOST="$TEST_EXPECT_ORACLE_HOST" \
+    /bin/sh -c "$CRON_COMMAND"
+fi

@@ -1,0 +1,12 @@
+#!/bin/bash
+set -euo pipefail
+printf 'bundle %s\n' "$*" >> "$TEST_CALLS"
+if [[ "$1" == check ]]; then
+  exit "${TEST_BUNDLE_STATUS:-0}"
+fi
+[[ "$1 $2" == 'exec ruby' ]]
+if [[ -n "${TEST_EXPECT_ORACLE_HOST:-}" ]]; then
+  [[ "${ORACLE_HOST:-}" == "$TEST_EXPECT_ORACLE_HOST" ]]
+fi
+printf 'cwd=%s\n' "$PWD" >> "$TEST_CALLS"
+printf 'ld=%s\n' "$LD_LIBRARY_PATH" >> "$TEST_CALLS"

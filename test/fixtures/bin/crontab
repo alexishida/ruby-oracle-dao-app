@@ -1,0 +1,18 @@
+#!/bin/bash
+set -euo pipefail
+case "$1" in
+  -l)
+    if [[ "${TEST_CRONTAB_ERROR:-}" != '' ]]; then
+      printf '%s\n' "$TEST_CRONTAB_ERROR" >&2
+      exit 1
+    fi
+    cat "$TEST_CRONTAB"
+    ;;
+  -)
+    cat > "$TEST_CRONTAB"
+    ;;
+  *)
+    printf 'Unexpected crontab operation: %s\n' "$1" >&2
+    exit 1
+    ;;
+esac
